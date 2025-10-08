@@ -11,33 +11,10 @@
   inherit (lib.options) mkOption mkEnableOption mkPackageOption;
   inherit (lib.trivial) importTOML;
   inherit (lib.meta) getExe;
-  inherit (lib.types) nullOr bool lines submodule;
-
+  inherit (lib.types) nullOr bool lines submodule str;
+  inherit (lib) optional;
+  
   tomlFormat = pkgs.formats.toml {};
-
-  theme = {
-    name = "nixos";
-    type = submodule {
-      options = {
-        layout = mkOption {
-          inherit (tomlFormat) type;
-          default = {};
-          description = ''
-            The layout of the theme.
-
-            See <https://github.com/abenz1267/walker/wiki/Theming> for the full list of options.
-          '';
-        };
-
-        style = mkOption {
-          type = lines;
-          default = "";
-          description = "The styling of the theme, written in GTK CSS.";
-        };
-      };
-    };
-  };
-
   cfg = config.programs.walker;
 in {
   imports = [
@@ -70,7 +47,20 @@ in {
       };
 
       theme = mkOption {
-        type = nullOr theme.type;
+        type = nullOr (submodule {
+          options = {
+            name = mkOption {
+              type = str;
+              default = "nixos";
+              description = "The theme name.";
+            };
+            style = mkOption {
+              type = lines;
+              default = "";
+              description = "The styling of the theme, written in GTK CSS.";
+            };
+          };
+        });
         default = null;
         description = "The custom theme used by walker. Setting this option overrides `config.theme`.";
       };
@@ -97,7 +87,16 @@ in {
 
       systemd.services.walker = mkIf cfg.runAsService {
         description = "Walker - Application Runner";
+        after = [
+          "graphical-session.target"
+          "elephant.service"
+        ];
+        requires = ["elephant.service"];
+        partOf = ["graphical-session.target"];
         wantedBy = ["graphical-session.target"];
+        restartTriggers =
+          optional (cfg.config != {}) config.environment.etc."xdg/walker/config.toml".source
+          ++ optional (cfg.theme != null) config.environment.etc."xdg/walker/themes/${cfg.theme.name}/style.css".text;
         serviceConfig = {
           ExecStart = "${getExe cfg.package} --gapplication-service";
           Restart = "on-failure";
@@ -106,12 +105,8 @@ in {
     }
 
     (mkIf (cfg.theme != null) {
-      programs.walker.config.theme = mkDefault theme.name;
-
-      environment.etc = {
-        "xdg/walker/themes/${theme.name}.toml".source = tomlFormat.generate "walker-themes-${theme.name}.toml" cfg.theme.layout;
-        "xdg/walker/themes/${theme.name}.css".text = cfg.theme.style;
-      };
+      programs.walker.config.theme = cfg.theme.name;
+      environment.etc."xdg/walker/themes/${cfg.theme.name}/style.css".text = cfg.theme.style;
     })
   ]);
 }
