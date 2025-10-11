@@ -128,6 +128,10 @@ impl Walker {
 
         let mut config: Walker = default_config.try_deserialize()?;
 
+        let base_dirs = xdg::BaseDirectories::with_prefix("walker");
+        let xdg_result = base_dirs.find_config_file("config.toml");
+        println!("XDG config lookup result: {:?}", xdg_result);
+
         if let Some(user_config_path) =
             xdg::BaseDirectories::with_prefix("walker").find_config_file("config.toml")
         {
