@@ -234,6 +234,9 @@ pub fn setup_window(app: &Application) {
     let mut windows: HashMap<String, WindowData> = HashMap::new();
 
     with_themes(|t| {
+        eprintln!("Available themes: {:?}", t.keys().collect::<Vec<_>>());
+        eprintln!("Requested theme: {}", get_theme());
+
         for (key, val) in t {
             match setup_theme_window(app, val) {
                 Ok(res) => {
