@@ -45,10 +45,13 @@ impl Theme {
 pub fn setup_themes(elephant: bool, theme: String, is_service: bool) {
     let mut themes: HashMap<String, Theme> = HashMap::new();
 
-    let dirs = xdg::BaseDirectories::with_prefix("walker").find_config_files("themes");
-    println!("Config theme directories: {:?}", dirs);
+    let dirs = xdg::BaseDirectories::with_prefix("walker").find_config_files("themes").collect();
 
-    let mut paths: Vec<PathBuf> = dirs.collect();
+    for dir in &dirs {
+        println!("Config theme directory: {:?}", dir);
+    }
+    
+    let mut paths: Vec<PathBuf> = dirs;
     println!("Initial theme paths: {:?}", paths);
 
     if let Some(a) = &get_config().additional_theme_location
