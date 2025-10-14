@@ -83,12 +83,12 @@ programs.walker.enable = true;
 **Option B** (NixOS Module): Import the nixos module in your NixOS config and enable walker
 
 ```nix
-imports = [inputs.walker.homeManagerModules.default];
+imports = [inputs.walker.nixosModules.default];
 
 programs.walker.enable = true;
 ```
 
-**Option C** (Package): Add `inputs.walker.packages.<system>.default` to your system packages or home-manager packages. replace `<system>` with your system architecture
+**Option C** (Package): Add `inputs.walker.packages.<system>.default` to your system packages or home-manager packages. replace `<system>` with your system architecture. Note: This option doesn't support configuration using nix.
 
 ```nix
 home.packages = [inputs.walker.packages.<system>.default];
@@ -96,10 +96,9 @@ home.packages = [inputs.walker.packages.<system>.default];
 
 ```nix
 environment.systemPackages = [inputs.walker.packages.<system>.default];
-
 ```
 
-#### 3. Configure walker:
+#### 3. Configure walker
 
 ```nix
 programs.walker = {
@@ -126,7 +125,7 @@ programs.walker = {
       # Check out the default layouts for examples https://github.com/abenz1267/walker/tree/master/resources/themes/default
       layouts = {
         "layout" = " <!-- xml --> ";
-        "item_calc" = " <!-- xml --> "
+        "item_calc" = " <!-- xml --> ";
         # other provider layouts
       };
     };
@@ -135,7 +134,7 @@ programs.walker = {
     };
     # more themes
   };
-}
+};
 ```
 
 Optionally, there is 2 binary caches which can be used by adding the following to you config:
@@ -199,7 +198,7 @@ You can customize rendering of list items for each provider individually, f.e. "
 
 Please refer to [the GTK4 docs](https://docs.gtk.org/gtk4/) to checkout how to write `*.xml` files for GTK4.
 
-**THE DEFAULT THEME CANNOT BE CHANGED**.
+You can set the default theme in your `config.toml` f.e. `theme = "yours"`.
 
 ## Contributing
 
