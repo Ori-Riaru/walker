@@ -194,7 +194,7 @@ in {
       )
     ];
 
-    systemd.services.walker = mkIf cfg.runAsService {
+    systemd.user.services.walker = mkIf cfg.runAsService {
       description = "Walker - Application Runner";
       unitConfig = {
         ConditionEnvironment = "WAYLAND_DISPLAY";
@@ -209,6 +209,7 @@ in {
       serviceConfig = {
         ExecStart = "${getExe cfg.package} --gapplication-service";
         Restart = "on-failure";
+        PassEnvironment = "WAYLAND_DISPLAY DISPLAY DBUS_SESSION_BUS_ADDRESS XDG_RUNTIME_DIR XDG_CURRENT_DESKTOP PATH";
       };
     };
   };
